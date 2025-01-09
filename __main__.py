@@ -1,2 +1,2 @@
-from injection_manager.managers import InjectionManager, AsyncInjectionManager, EventInjectionManager
-from injection_manager.typeclass import Injectable, AsyncInjectable
+from injection_manager.managers import InjectionManager, EventInjectionManager
+from injection_manager.typeclass import Injectable

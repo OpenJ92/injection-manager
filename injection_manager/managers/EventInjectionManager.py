@@ -1,6 +1,7 @@
 from asyncio import gather, Event
 
 from injection_manager.typeclass.Injectable import Injectable
+from injection_manager.typeclass.Session import AsyncSession
 
 class EventInjectionManager:
     def __init__(self, base):
@@ -22,7 +23,7 @@ class EventInjectionManager:
             self.events[table_name] = Event()
         return self.events[table_name]
 
-    async def inject(self, replay, session):
+    async def inject(self, replay, session: AsyncSession):
         """
         Perform the injection process using Event-based synchronization.
         :param replay: Parsed replay object to inject.
@@ -30,9 +31,9 @@ class EventInjectionManager:
         """
         tasks = []
         for name, relation in self.metadata.tables.items():
-            relation_cls = self.base.injectable.get(name)
+            relation = self.base.injectable.get(name)
 
-            if relation_cls and issubclass(relation_cls, AsyncInjectable):
+            if relation and issubclass(relation, AsyncInjectable):
                 # Define dependencies from the class relationships
                 dependencies = []
                 for dependency in relation.foreign_key_constraints:
@@ -40,16 +41,19 @@ class EventInjectionManager:
                     dependencies.append(fkey)
 
                 # Inject the current relation
-                tasks.append(self._inject_relation(relation_cls, replay, session, dependencies))
+                tasks.append(self._inject_relation(relation: Injectable
+                                                   , replay
+                                                   , session: AsyncSession
+                                                   , dependencies))
 
         # Run all tasks concurrently
         await gather(*tasks)
         await session.commit()
 
-    async def _inject_relation(self, relation_cls: Injectable, replay, session, dependencies):
+    async def _inject_relation(self, relation: Injectable, replay, session: AsyncSession, dependencies):
         """
         Inject a single relation, waiting for dependencies to complete.
-        :param relation_cls: The model class to process.
+        :param relation: The model class to process.
         :param replay: Parsed replay object.
         :param session: Database session.
         :param dependencies: List of dependent table names.
@@ -62,12 +66,12 @@ class EventInjectionManager:
 
         try:
             # Process the current relation
-            await relation_cls.async_process(replay, session)
+            await relation.process(replay, session)
             await session.flush()  # Flush after processing
         except Exception as e:
             await session.rollback()
-            print(f"Error processing {relation_cls.__tablename__}: {e}")
+            print(f"Error processing {relation.__tablename__}: {e}")
         finally:
             # Signal that this relation is complete
-            name = f"{relation_cls.__tableschema__}.{relation_cls.__tablename__}"
+            name = f"{relation.__tableschema__}.{relation.__tablename__}"
             self._get_event(name).set()

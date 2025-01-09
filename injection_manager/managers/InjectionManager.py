@@ -1,6 +1,7 @@
 from collections import defaultdict
 
 from injection_manager.typeclass.Injectable import Injectable
+from injection_manager.typeclass.Session import AsyncSession
 
 class InjectionManager():
     def __init__(self, base):
@@ -13,7 +14,7 @@ class InjectionManager():
         ## self.sorted_relations = self._topological_sort()
 
 
-    def inject(self, replay, session):
+    def inject(self, replay, session: AsyncSession):
         """
         Perform the injection process for a replay.
         :param replay: Parsed replay object to inject.
