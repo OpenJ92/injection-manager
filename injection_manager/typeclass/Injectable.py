@@ -1,5 +1,4 @@
 from typing import Protocol
-from collections import defaultdict
 
 class Injectable(Protocol):
     @classmethod
@@ -9,6 +8,6 @@ class Injectable(Protocol):
         pass
 
     @classmethod
-    def sync_process(cls, replay, session):
+    def process(cls, replay, session):
         """Must be implemented by subclasses."""
         pass

@@ -24,7 +24,6 @@ class InjectionManager():
             for relation in self.metadata.sorted_tables:
                 name = f"{relation.schema}.{relation.name}"
                 relation_cls = self.base.injectable.get(name)
-                breakpoint()
                 if relation_cls and issubclass(relation_cls, Injectable):
                     print(f"Inject relation - {name}")
                     relation_cls.process(replay, session)

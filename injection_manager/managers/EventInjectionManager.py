@@ -1,6 +1,6 @@
 from asyncio import gather, Event
 
-from injection_manager.typeclass.AsyncInjectable import AsyncInjectable
+from injection_manager.typeclass.Injectable import Injectable
 
 class EventInjectionManager:
     def __init__(self, base):
@@ -46,7 +46,7 @@ class EventInjectionManager:
         await gather(*tasks)
         await session.commit()
 
-    async def _inject_relation(self, relation_cls, replay, session, dependencies):
+    async def _inject_relation(self, relation_cls: Injectable, replay, session, dependencies):
         """
         Inject a single relation, waiting for dependencies to complete.
         :param relation_cls: The model class to process.
