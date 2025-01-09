@@ -23,10 +23,10 @@ class EventInjectionManager:
             self.events[table_name] = Event()
         return self.events[table_name]
 
-    async def inject(self, replay, session: AsyncSession):
+    async def inject(self, data, session: AsyncSession):
         """
         Perform the injection process using Event-based synchronization.
-        :param replay: Parsed replay object to inject.
+        :param data: Parsed data object to inject.
         :param session: Database session supporting flush, commit, and rollback.
         """
         tasks = []
@@ -40,17 +40,17 @@ class EventInjectionManager:
                     dependencies.append(fkey)
 
                 # Inject the current relation
-                tasks.append(self._inject_relation(ORM_Injectable, replay, session, dependencies))
+                tasks.append(self._inject_relation(ORM_Injectable, data, session, dependencies))
 
         # Run all tasks concurrently
         await gather(*tasks)
         await session.commit()
 
-    async def _inject_relation(self, relation: Injectable, replay, session: AsyncSession, dependencies):
+    async def _inject_relation(self, relation: Injectable, data, session: AsyncSession, dependencies):
         """
         Inject a single relation, waiting for dependencies to complete.
         :param relation: The model class to process.
-        :param replay: Parsed replay object.
+        :param data: Parsed data object.
         :param session: Database session.
         :param dependencies: List of dependent table names.
         """
@@ -62,7 +62,7 @@ class EventInjectionManager:
 
         try:
             # Process the current relation
-            await relation.process(replay, session)
+            await relation.process(data, session)
             await session.flush()  # Flush after processing
         except Exception as e:
             await session.rollback()
