@@ -41,10 +41,7 @@ class EventInjectionManager:
                     dependencies.append(fkey)
 
                 # Inject the current relation
-                tasks.append(self._inject_relation(relation: Injectable
-                                                   , replay
-                                                   , session: AsyncSession
-                                                   , dependencies))
+                tasks.append(self._inject_relation(relation, replay, session, dependencies))
 
         # Run all tasks concurrently
         await gather(*tasks)

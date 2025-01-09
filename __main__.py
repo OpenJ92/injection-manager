@@ -1,2 +1,4 @@
 from injection_manager.managers import InjectionManager, EventInjectionManager
 from injection_manager.typeclass import Injectable
+
+from starcraft_data_orm.warehouse.config import SessionLocal
