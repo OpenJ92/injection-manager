@@ -31,9 +31,8 @@ class EventInjectionManager:
         """
         tasks = []
         for name, relation in self.metadata.tables.items():
-            relation = self.base.injectable.get(name)
-
-            if relation and issubclass(relation, AsyncInjectable):
+            ORM_Injectable = self.base.injectable.get(name)
+            if ORM_Injectable:
                 # Define dependencies from the class relationships
                 dependencies = []
                 for dependency in relation.foreign_key_constraints:
@@ -41,7 +40,7 @@ class EventInjectionManager:
                     dependencies.append(fkey)
 
                 # Inject the current relation
-                tasks.append(self._inject_relation(relation, replay, session, dependencies))
+                tasks.append(self._inject_relation(ORM_Injectable, replay, session, dependencies))
 
         # Run all tasks concurrently
         await gather(*tasks)

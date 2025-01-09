@@ -14,26 +14,27 @@ class InjectionManager():
         ## self.sorted_relations = self._topological_sort()
 
 
-    def inject(self, replay, session: AsyncSession):
+    async def inject(self, replay, session: AsyncSession):
         """
         Perform the injection process for a replay.
         :param replay: Parsed replay object to inject.
         :param session: Database session supporting flush, commit and rollback:
         """
-
         try:
             for relation in self.metadata.sorted_tables:
                 name = f"{relation.schema}.{relation.name}"
                 relation_cls = self.base.injectable.get(name)
-                if relation_cls and issubclass(relation_cls, Injectable):
+                if relation_cls:
                     print(f"Inject relation - {name}")
-                    relation_cls.process(replay, session)
-                    session.flush()  # Flush after each relation
-            session.commit()
+                    await relation_cls.process(replay, session)
+                    await session.flush()  # Flush after each relation
+            await session.commit()
 
         except Exception as e:
-            session.rollback()
+            await session.rollback()
+            import traceback
             print(f"Unexpected error: {e} in {name}")
+            print(traceback.format_exc())
             # Gracefully handle all other exceptions
 
 
