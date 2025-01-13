@@ -33,6 +33,7 @@ class InjectionManager():
         except Exception as e:
             await session.rollback()
             print(f"Unexpected error: {e} in {name}")
+            raise e
             # Gracefully handle all other exceptions
 
 

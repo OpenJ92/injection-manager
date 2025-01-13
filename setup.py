@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="injection-manager",
-    version="0.1.0",  # Update version if necessary
+    version="0.1.1",  # Update version if necessary
     description="An async-enabled injection framework for StarCraft data.",
     author="Jacob Vartuli-Schonberg",
     author_email="jacob.vartuli.schonberg@gmail.com",
