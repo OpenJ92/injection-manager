@@ -1,68 +1,77 @@
 # Injection Manager
-Injection Manager is a lightweight and async-enabled data injection framework for Python. It is designed to work seamlessly with SQLAlchemy and makes managing data pipelines simpler and more efficient.
+Injection Manager is a lightweight, async-enabled data injection framework for
+Python. It coordinates custom injectable classes against SQLAlchemy-style
+metadata so parsed data can be written to related database tables in dependency
+order.
 
 ### Features
-- Works with both synchronous and asynchronous SQLAlchemy sessions.
-- Easily extensible through custom injectable models.
-- Designed with testing in mind, supporting mock data and test utilities.
-- Modular and scalable for complex workflows.
+- Works with asynchronous SQLAlchemy-style sessions.
+- Processes injectable models in `Base.metadata.sorted_tables` order.
+- Flushes after each injectable and commits once the full injection succeeds.
+- Rolls back the session if an injectable raises an error.
+- Exposes both sequential and event-based injection managers.
 
 ### Installation
 To install the package, run:
 
-```code
+```sh
 pip install injection-manager
 ```
 
 ### Usage
-Define an Injectable Model
-Create a custom model that inherits from the Injectable class and implements the process method:
+Define an injectable model by implementing the `Injectable` protocol. The
+manager handles flushing and committing, so injectable classes should only add
+objects to the session.
 
 ```python
-Copy code
 from injection_manager import Injectable
 
 class MyModel(Injectable):
-    @staticmethod
-    async def process(data, session):
+    __tableschema__ = "public"
+    __tablename__ = "my_model"
+
+    @classmethod
+    async def process(cls, data, session):
         # Process data and add it to the session
         session.add(data)
 ```
 
-### Inject Data
-Use the InjectionManager to inject data into the database:
+Create an `InjectionManager` with a SQLAlchemy declarative base-like object. The
+base must provide:
+
+- `metadata.sorted_tables`, where each table has `schema` and `name`
+- `injectable`, a dictionary keyed by `"schema.table"` and valued by injectable
+  classes
+
+Then pass parsed data and an async session to `inject`.
 
 ```python
-Copy code
 from injection_manager import InjectionManager
-from sqlalchemy.ext.asyncio import create_async_engine
 
-engine = create_async_engine("postgresql+asyncpg://user:password@host/dbname")
-manager = InjectionManager(sessionmaker=engine)
+manager = InjectionManager(WarehouseBase)
+await manager.inject(replay, session)
 ```
 
-### Inject data
-```python 
-await manager.inject(MyModel, data)
-```
+`EventInjectionManager` is also available for dependency-aware concurrent
+injection. It waits for foreign-key dependencies before processing dependent
+relations.
 
 ### Testing
-You can mock sessions and use test utilities to validate your process methods.
+You can mock sessions to validate injectable `process` methods.
 
-Example Test
 ```python
-Copy code
-import pytest
-from unittest.mock import AsyncMock
+import unittest
+from unittest.mock import Mock
 
-@pytest.mark.asyncio
-async def test_process():
-    mock_session = AsyncMock()
-    data = {"id": 1, "name": "Test"}
-    await MyModel.process(data, mock_session)
-    mock_session.add.assert_called_once_with(data)
+class MyModelTest(unittest.IsolatedAsyncioTestCase):
+    async def test_process(self):
+        mock_session = Mock()
+        data = {"id": 1, "name": "Test"}
+
+        await MyModel.process(data, mock_session)
+
+        mock_session.add.assert_called_once_with(data)
 ```
 
-License
+### License
 This project is licensed under the MIT License.
-
