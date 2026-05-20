@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
     name="injection-manager",
     version="0.1.1",  # Update version if necessary
-    description="An async-enabled injection framework for StarCraft data.",
+    description="An async-enabled injection framework for SQLAlchemy-style data pipelines.",
     author="Jacob Vartuli-Schonberg",
     author_email="jacob.vartuli.schonberg@gmail.com",
     url="https://github.com/OpenJ92/injection-manager",
@@ -15,4 +15,3 @@ setup(
     ],
     python_requires=">=3.8",
 )
-
