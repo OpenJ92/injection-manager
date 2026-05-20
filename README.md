@@ -48,8 +48,8 @@ Then pass parsed data and an async session to `inject`.
 ```python
 from injection_manager import InjectionManager
 
-manager = InjectionManager(WarehouseBase)
-await manager.inject(replay, session)
+manager = InjectionManager(AppBase)
+await manager.inject(data, session)
 ```
 
 `EventInjectionManager` is also available for dependency-aware concurrent
@@ -57,7 +57,12 @@ injection. It waits for foreign-key dependencies before processing dependent
 relations.
 
 ### Testing
-You can mock sessions to validate injectable `process` methods.
+You can mock sessions to validate injectable `process` methods. The repository
+test suite uses only the Python standard library and can be run in Docker:
+
+```sh
+docker compose run --rm injection-manager
+```
 
 ```python
 import unittest

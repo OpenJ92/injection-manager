@@ -1,6 +1,3 @@
-from collections import defaultdict
-
-from injection_manager.typeclass.Injectable import Injectable
 from injection_manager.typeclass.Session import AsyncSession
 
 class InjectionManager():
@@ -35,23 +32,3 @@ class InjectionManager():
             print(f"Unexpected error: {e} in {name}")
             raise e
             # Gracefully handle all other exceptions
-
-
-
-## ## Consider Supplying a "Base" at each level of the starcraft_data_orm via __init__.py file
-## class InjectionManagerFactory():
-##     def __init__(self):
-##         pass
-## 
-##     @classmethod
-##     def WAREHOUSE(cls):
-##         return InjectionManager(WareshouseBase)
-## 
-##     @classmethod
-##     def ANALYTICS(cls):
-##         return InjectionManager(AnalyticsBase)
-## 
-##     @classmethod
-##     def MACHINE_LEARNING(cls):
-##         return InjectionManager(MachineLearningBase)
-
